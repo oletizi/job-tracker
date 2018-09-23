@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
-public class ProcessExecutionEngine implements ExecutionEngine {
+public class ProcessExecutionEngine extends RunnableExecutionEngine {
 
   private static final Logger logger = new LoggerFactory().getLoggerFor(ProcessExecutionEngine.class);
   private static final int STATUS_BARF = -1 * (0xba * 0xf);
@@ -20,6 +20,7 @@ public class ProcessExecutionEngine implements ExecutionEngine {
   private final ExecutorService executor;
 
   public ProcessExecutionEngine(final File tmpDir, final ExecutorService executor) {
+    super(tmpDir, executor);
     this.tmpDir = tmpDir;
     this.executor = executor;
   }
@@ -71,8 +72,6 @@ public class ProcessExecutionEngine implements ExecutionEngine {
         final TeeOutputStream err = new TeeOutputStream(System.err, errFileStream);
 
 
-//        final StreamSink outSink = new StreamSink(new PipedInputStream(outSinkStream), outLog);
-//        final StreamSink errSink = new StreamSink(new PipedInputStream(errSinkStream), errLog);
         final StreamPump outPump = new StreamPump(proc.getInputStream(), out);
         final StreamPump errPump = new StreamPump(proc.getErrorStream(), err);
 

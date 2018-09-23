@@ -19,7 +19,6 @@ public class JobManagerTest {
 
   private ExecutionEngine executionEngine;
   private JobManager manager;
-  private int maxJobRetention = 1;
 
   @Before
   public void before() {

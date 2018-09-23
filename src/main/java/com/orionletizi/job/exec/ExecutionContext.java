@@ -13,6 +13,7 @@ public class ExecutionContext {
   private static final Logger logger = new LoggerFactory().getLoggerFor(ExecutionContext.class);
   private final String id;
   private final String[] command;
+  private final Executable executable;
   private String stdoutName;
   private String stderrName;
   private Collection<CompletionListener> listeners = new ArrayList<>();
@@ -21,6 +22,13 @@ public class ExecutionContext {
   public ExecutionContext(final String id, final String[] command) {
     this.id = id;
     this.command = command;
+    this.executable = null;
+  }
+
+  public ExecutionContext(final String id, final Executable executable) {
+    this.id = id;
+    this.executable = executable;
+    this.command = null;
   }
 
   @JsonProperty
@@ -32,7 +40,6 @@ public class ExecutionContext {
   public List<String> getCommand() {
     return Arrays.asList(command);
   }
-
 
   @JsonProperty
   public String getStdoutName() {
@@ -76,4 +83,7 @@ public class ExecutionContext {
     }
   }
 
+  public Executable getExecutable() {
+    return executable;
+  }
 }
