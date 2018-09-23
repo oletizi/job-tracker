@@ -5,8 +5,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.util.concurrent.BlockingQueue;
@@ -41,6 +39,8 @@ public class RunnableExecutionEngineTest {
     final ExecutionResult result = mock(ExecutionResult.class);
     when(ctxt.getExecutable()).thenReturn(executable);
 
+    final BlockingQueue<Object> completionQueue = new LinkedBlockingQueue<>();
+
     // Set up the executable mock to invoke the notifyComplete callback
     doAnswer((invocation) -> {
       final CompletionListener listener = invocation.getArgumentAt(0, CompletionListener.class);
@@ -48,7 +48,15 @@ public class RunnableExecutionEngineTest {
       return null;
     }).when(executable).onCompletion(any(CompletionListener.class));
 
+    doAnswer((invocation)->{
+      completionQueue.offer(new Object());
+      return null;
+    }).when(executable).run();
+
     engine.run(ctxt);
+
+    // block until the run() is called on the executable
+    completionQueue.take();
 
     verify(executable, times(1)).run();
     verify(executable, times(1)).onCompletion(any(CompletionListener.class));

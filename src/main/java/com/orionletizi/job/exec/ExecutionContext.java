@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 public class ExecutionContext {
   private static final Logger logger = new LoggerFactory().getLoggerFor(ExecutionContext.class);
+  private final CompletionHandler completionHandler = new CompletionHandler();
   private final String id;
   private final String[] command;
   private final Executable executable;
@@ -62,25 +63,12 @@ public class ExecutionContext {
   }
 
   public synchronized void notifyComplete(final ExecutionResult result) {
-    logger.info("notifyComplete(result: " + result + ")");
-    if (this.result != null) {
-      throw new RuntimeException("Attempt to notify complete more than once!");
-    }
-    this.result = result;
-    for (CompletionListener listener : listeners) {
-      listener.notifyComplete(result);
-    }
+    completionHandler.notifyComplete(result);
   }
 
 
   public synchronized void onCompletion(CompletionListener listener) {
-    if (result != null) {
-      // we're already complete
-      listener.notifyComplete(result);
-    } else {
-      // still waiting for completion.
-      listeners.add(listener);
-    }
+    completionHandler.onCompletion(listener);
   }
 
   public Executable getExecutable() {

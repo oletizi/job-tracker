@@ -2,12 +2,12 @@ package com.orionletizi.job.exec;
 
 import logging.JobLogFormatter;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+@SuppressWarnings("WeakerAccess")
 public final class ExecutableLogger {
   private final JobLogFormatter formatter = new JobLogFormatter();
   private final Executable executable;
@@ -35,7 +35,9 @@ public final class ExecutableLogger {
   private void write(final LogRecord record) {
     try {
       record.setLoggerName(executable.getClass().getSimpleName());
-      out.write(formatter.format(record));
+      final String msg = formatter.format(record);
+      out.write(msg);
+      System.err.print(msg);
     } catch (IOException e) {
       e.printStackTrace();
     }
