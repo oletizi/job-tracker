@@ -1,12 +1,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.orionletizi</groupId>
   <artifactId>job-tracker</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <name>job-tracker</name>
-  <url>http://maven.apache.org</url>
+  <url>https://github.com/oletizi/job-tracker</url>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>com.orionletizi.mvn</id>
+      <url>s3://com.orionletizi.mvn/snapshot</url>
+    </snapshotRepository>
+    <repository>
+      <id>com.orionletizi.mvn</id>
+      <url>s3://com.orionletizi.mvn/release</url>
+    </repository>
+  </distributionManagement>
+
   <build>
     <plugins>
       <plugin>
@@ -19,7 +31,15 @@
         </configuration>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.kuali.maven.wagons</groupId>
+        <artifactId>maven-s3-wagon</artifactId>
+        <version>1.2.1</version>
+      </extension>
+    </extensions>
   </build>
+
   <dependencies>
     <dependency>
       <groupId>org.apache.commons</groupId>
