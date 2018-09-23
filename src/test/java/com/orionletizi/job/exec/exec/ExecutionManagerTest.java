@@ -5,9 +5,13 @@ import logging.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -39,10 +43,24 @@ public class ExecutionManagerTest {
     final ExecutionContext ctxt = manager.execute(job, command);
     assertNotNull(ctxt);
 
-    final ExecutionResult result = manager.waitFor(ctxt.getId());
-    assertNotNull(result);
+    final BlockingQueue<ExecutionResult> completionQueue = new LinkedBlockingQueue<>();
 
+    final CompletionListener listener = result -> {
+      try {
+        completionQueue.put(result);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+        fail(e.getMessage());
+      }
+    };
+
+    ctxt.listenForCompletion(listener);
+    assertEquals(1, completionQueue.size());
     verify(job, times(1)).addExecutionContext(ctxt);
+
+    // check to see if new listeners added after completion are notified
+    ctxt.listenForCompletion(listener);
+    assertEquals(2, completionQueue.size());
   }
 
 }

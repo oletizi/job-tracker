@@ -16,11 +16,11 @@ public class ExecutionResult {
     this.exception = e;
   }
 
-  void setOutLog(String outLog) {
+  void setStdoutName(String outLog) {
     this.outLog = outLog;
   }
 
-  void setErrLog(String errLog) {
+  void setStderrName(String errLog) {
     this.errLog = errLog;
   }
 

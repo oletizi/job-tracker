@@ -4,6 +4,8 @@ import com.orionletizi.job.Job;
 import logging.LoggerFactory;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -15,6 +17,7 @@ public class ExecutionManager {
   private static final AtomicLong SEQUENCE = new AtomicLong();
   private final Map<String, ExecutionContext> contextsById = new HashMap<>();
   private final ExecutionEngine engine;
+  private final Collection<CompletionListener> listeners= new ArrayList<>();
 
   public ExecutionManager(final ExecutionEngine engine) {
     this.engine = engine;
@@ -39,14 +42,4 @@ public class ExecutionManager {
     return CREATE_TIME + "-" + SEQUENCE + "-" + System.currentTimeMillis();
   }
 
-  public ExecutionResult waitFor(String id) throws InterruptedException {
-    synchronized (contextsById) {
-      final ExecutionContext ctxt = contextsById.get(id);
-      ExecutionResult rv = null;
-      if (ctxt != null) {
-        rv = ctxt.waitFor();
-      }
-      return rv;
-    }
-  }
 }

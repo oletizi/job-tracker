@@ -1,6 +1,5 @@
 package com.orionletizi.job.exec.exec;
 
-import com.orionletizi.job.Job;
 import logging.LoggerFactory;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
@@ -42,11 +41,11 @@ public class ProcessExecutionEngine implements ExecutionEngine {
       String outLogName = outLog.getName();
       String errLogName = errLog.getName();
 
-      result.setOutLog(outLogName);
-      ctxt.addStdout(outLogName);
+      result.setStdoutName(outLogName);
+      ctxt.setStdoutName(outLogName);
 
-      result.setErrLog(errLogName);
-      ctxt.addStderr(errLogName);
+      result.setStderrName(errLogName);
+      ctxt.setStderrName(errLogName);
 
       logger.info("Starting process for: " + ctxt);
       final Process proc = builder.start();

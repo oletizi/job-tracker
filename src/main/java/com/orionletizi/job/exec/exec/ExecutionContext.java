@@ -2,6 +2,8 @@ package com.orionletizi.job.exec.exec;
 
 import logging.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
@@ -10,9 +12,10 @@ public class ExecutionContext {
   private static final Logger logger = new LoggerFactory().getLoggerFor(ExecutionContext.class);
   private final String id;
   private final String[] command;
-  private String outLogName;
-  private String errLogName;
-  private final BlockingQueue<ExecutionResult> completionQueue = new LinkedBlockingQueue();
+  private String stdoutName;
+  private String stderrName;
+  private Collection<CompletionListener> listeners = new ArrayList<>();
+  private ExecutionResult result;
 
   ExecutionContext(final String id, final String[] command) {
     this.id = id;
@@ -27,20 +30,44 @@ public class ExecutionContext {
     return command;
   }
 
-  public ExecutionResult waitFor() throws InterruptedException {
-    return completionQueue.take();
-  }
-
-  public void notifyComplete(final ExecutionResult result) throws InterruptedException {
+  public synchronized void notifyComplete(final ExecutionResult result) throws InterruptedException {
     logger.info("notifyComplete(result: " + result + ")");
-    completionQueue.put(result);
+    if (this.result != null) {
+      throw new RuntimeException("Attempt to notify complete more than once!");
+    }
+    this.result = result;
+    for (CompletionListener listener : listeners) {
+      listener.notifyComplete(result);
+    }
   }
 
-  void addStdout(String outLogName) {
-    this.outLogName = outLogName;
+
+  public synchronized void listenForCompletion(CompletionListener listener) {
+    if (result != null) {
+      // we're already complete
+      listener.notifyComplete(result);
+    } else {
+      // still waiting for completion.
+      listeners.add(listener);
+    }
   }
 
-  void addStderr(String errLogName) {
-    this.errLogName = errLogName;
+  public String getStdoutName() {
+    return stdoutName;
   }
+
+  public ExecutionContext setStdoutName(String stdoutName) {
+    this.stdoutName = stdoutName;
+    return this;
+  }
+
+  public String getStderrName() {
+    return stderrName;
+  }
+
+  public ExecutionContext setStderrName(String stderrName) {
+    this.stderrName = stderrName;
+    return this;
+  }
+
 }
