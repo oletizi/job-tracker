@@ -21,10 +21,10 @@ public abstract class RunnableExecutionEngine implements ExecutionEngine {
 
       ctxt.setStderrName(errfile.getName());
 
-      final Executable executable = ctxt.getExecutable();
-      executable.setLogger(new ExecutableLogger(executable, err));
+      final Task task = ctxt.getTask();
+      task.setLogger(new ExecutableLogger(task, err));
 
-      executable.onCompletion(result -> {
+      task.onCompletion(result -> {
         // close writers
         try {
           err.close();
@@ -34,7 +34,7 @@ public abstract class RunnableExecutionEngine implements ExecutionEngine {
         // notify the context that it is complete.
         ctxt.notifyComplete(result);
       });
-      executorService.submit(executable);
+      executorService.submit(task);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

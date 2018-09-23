@@ -50,7 +50,7 @@ public class Job {
   }
 
   @JsonProperty
-  public synchronized List<ExecutionContext> getExecutionLog() {
+  public synchronized List<ExecutionContext> getExecutions() {
     return new ArrayList<>(executionContexts);
   }
 

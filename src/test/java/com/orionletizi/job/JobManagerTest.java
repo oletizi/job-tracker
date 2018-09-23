@@ -1,7 +1,6 @@
 package com.orionletizi.job;
 
-import com.orionletizi.job.exec.ExecutionContext;
-import com.orionletizi.job.exec.ExecutionEngine;
+import com.orionletizi.job.exec.*;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -11,9 +10,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class JobManagerTest {
 
@@ -23,6 +20,12 @@ public class JobManagerTest {
   @Before
   public void before() {
     executionEngine = mock(ExecutionEngine.class);
+    doAnswer((invocation) -> {
+      final ExecutionContext ctxt = invocation.getArgumentAt(0, ExecutionContext.class);
+      ctxt.getTask().run();
+      return null;
+    }).when(executionEngine).run(any(ExecutionContext.class));
+
     manager = new JobManager(1, executionEngine);
   }
 
@@ -34,6 +37,9 @@ public class JobManagerTest {
     final Job jobById = manager.getJobById(job.getId());
     assertEquals(job, jobById);
 
+
+    // Test system executables
+
     final List<String[]> commands = new ArrayList<>();
     commands.add(new String[] {
         "echo", "hello, world"
@@ -41,9 +47,18 @@ public class JobManagerTest {
 
     manager.execute(job.getId(), commands);
 
-    final List<ExecutionContext> executions = job.getExecutionLog();
+    List<ExecutionContext> executions = job.getExecutions();
     assertEquals(1, executions.size());
     verify(executionEngine, times(1)).execute(executions.get(0));
+
+    // Test in-process runnable tasks
+    final Task task = mock(Task.class);
+    manager.run(job.getId(), task);
+
+    executions = job.getExecutions();
+    assertEquals(2, executions.size());
+    verify(task, times(1)).run();
+
   }
 
   @Test

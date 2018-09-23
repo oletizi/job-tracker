@@ -1,5 +1,6 @@
 package com.orionletizi.job;
 
+import com.orionletizi.job.exec.Task;
 import com.orionletizi.job.exec.ExecutionContext;
 import com.orionletizi.job.exec.ExecutionEngine;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class JobManager {
 
   private static final AtomicLong SEQUENCE = new AtomicLong();
@@ -26,7 +28,7 @@ public class JobManager {
 
   public Job newJob(final String description) {
     final Job job = new Job(nextId(), description);
-    synchronized(jobsById) {
+    synchronized (jobsById) {
       jobsById.put(job.getId(), job);
       if (retentionQueue.isAtFullCapacity()) {
         final Job garbage = retentionQueue.remove();
@@ -41,25 +43,38 @@ public class JobManager {
     return CREATE_TIME + "-" + SEQUENCE.incrementAndGet();
   }
 
-  public Job getJobById(String id) {
-    synchronized(jobsById) {
+  public Job getJobById(final String id) {
+    synchronized (jobsById) {
       return jobsById.get(id);
     }
   }
 
-  public void execute(String jobId, List<String[]> commands) {
-    for (String[] command : commands) {
-      Job job = null;
-      synchronized (jobsById) {
-        job = jobsById.get(jobId);
-        if (job == null) {
-          throw new RuntimeException("No such job: " + jobId);
-        }
-      }
-      final ExecutionContext ctxt = new ExecutionContext(nextId(), command);
-      job.addExecutionContext(ctxt);
-      executionEngine.execute(ctxt);
-    }
+  public void execute(final String jobId, String[] command) {
+    executionEngine.execute(prepareNewExecutionContext(jobId, new ExecutionContext(nextId(), command)));
+  }
 
+  public void execute(final String jobId, final List<String[]> commands) {
+    for (String[] command : commands) {
+      execute(jobId, command);
+    }
+  }
+
+  public void run(final String jobId, final Task task) {
+    executionEngine.run(prepareNewExecutionContext(jobId, new ExecutionContext(nextId(), task)));
+  }
+
+  public void run(final String jobId, final List<Task> tasks) {
+    for (Task task : tasks) {
+      run(jobId, task);
+    }
+  }
+
+  private ExecutionContext prepareNewExecutionContext(final String jobId, final ExecutionContext ctxt) {
+    final Job job = getJobById(jobId);
+    if (job == null) {
+      throw new RuntimeException("No such job: " + jobId);
+    }
+    job.addExecutionContext(ctxt);
+    return ctxt;
   }
 }

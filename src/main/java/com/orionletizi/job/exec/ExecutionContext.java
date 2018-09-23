@@ -14,7 +14,7 @@ public class ExecutionContext {
   private final CompletionHandler completionHandler = new CompletionHandler();
   private final String id;
   private final String[] command;
-  private final Executable executable;
+  private final Task task;
   private String stdoutName;
   private String stderrName;
   private Collection<CompletionListener> listeners = new ArrayList<>();
@@ -23,12 +23,12 @@ public class ExecutionContext {
   public ExecutionContext(final String id, final String[] command) {
     this.id = id;
     this.command = command;
-    this.executable = null;
+    this.task = null;
   }
 
-  public ExecutionContext(final String id, final Executable executable) {
+  public ExecutionContext(final String id, final Task task) {
     this.id = id;
-    this.executable = executable;
+    this.task = task;
     this.command = null;
   }
 
@@ -71,7 +71,7 @@ public class ExecutionContext {
     completionHandler.onCompletion(listener);
   }
 
-  public Executable getExecutable() {
-    return executable;
+  public Task getTask() {
+    return task;
   }
 }

@@ -1,7 +1,7 @@
 package com.orionletizi.job.exec;
 
-// XXX: This is badly named
-public interface Executable extends Runnable {
+// XXX: This is not well named
+public interface Task extends Runnable {
   void onCompletion(final CompletionListener listener);
 
   void setLogger(final ExecutableLogger logger);

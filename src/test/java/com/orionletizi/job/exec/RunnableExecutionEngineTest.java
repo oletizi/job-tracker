@@ -34,33 +34,33 @@ public class RunnableExecutionEngineTest {
   @Test
   public void testBasics() throws Exception {
 
-    final Executable executable = mock(Executable.class);
+    final Task task = mock(Task.class);
     final ExecutionContext ctxt = mock(ExecutionContext.class);
     final ExecutionResult result = mock(ExecutionResult.class);
-    when(ctxt.getExecutable()).thenReturn(executable);
+    when(ctxt.getTask()).thenReturn(task);
 
     final BlockingQueue<Object> completionQueue = new LinkedBlockingQueue<>();
 
-    // Set up the executable mock to invoke the notifyComplete callback
+    // Set up the task mock to invoke the notifyComplete callback
     doAnswer((invocation) -> {
       final CompletionListener listener = invocation.getArgumentAt(0, CompletionListener.class);
       listener.notifyComplete(result);
       return null;
-    }).when(executable).onCompletion(any(CompletionListener.class));
+    }).when(task).onCompletion(any(CompletionListener.class));
 
     doAnswer((invocation)->{
       completionQueue.offer(new Object());
       return null;
-    }).when(executable).run();
+    }).when(task).run();
 
     engine.run(ctxt);
 
-    // block until the run() is called on the executable
+    // block until the run() is called on the task
     completionQueue.take();
 
-    verify(executable, times(1)).run();
-    verify(executable, times(1)).onCompletion(any(CompletionListener.class));
-    verify(executable, times(1)).setLogger(any(ExecutableLogger.class));
+    verify(task, times(1)).run();
+    verify(task, times(1)).onCompletion(any(CompletionListener.class));
+    verify(task, times(1)).setLogger(any(ExecutableLogger.class));
     verify(ctxt, times(1)).setStderrName(anyString());
     verify(ctxt, times(1)).notifyComplete(result);
   }
@@ -74,7 +74,7 @@ public class RunnableExecutionEngineTest {
     final CompletionListener listener = result1 -> completionQueue.offer(result1);
 
 
-    final Executable executable = new Executable() {
+    final Task task = new Task() {
       private ExecutableLogger logger;
       private CompletionListener listener;
 
@@ -98,7 +98,7 @@ public class RunnableExecutionEngineTest {
     };
 
 
-    final ExecutionContext ctxt = new ExecutionContext("my-id", executable);
+    final ExecutionContext ctxt = new ExecutionContext("my-id", task);
     ctxt.onCompletion(listener);
     engine.run(ctxt);
 

@@ -10,11 +10,11 @@ import java.util.logging.LogRecord;
 @SuppressWarnings("WeakerAccess")
 public final class ExecutableLogger {
   private final JobLogFormatter formatter = new JobLogFormatter();
-  private final Executable executable;
+  private final Task task;
   private final Writer out;
 
-  public ExecutableLogger(final Executable executable, final Writer out) {
-    this.executable = executable;
+  public ExecutableLogger(final Task task, final Writer out) {
+    this.task = task;
     this.out = out;
   }
 
@@ -34,7 +34,7 @@ public final class ExecutableLogger {
 
   private void write(final LogRecord record) {
     try {
-      record.setLoggerName(executable.getClass().getSimpleName());
+      record.setLoggerName(task.getClass().getSimpleName());
       final String msg = formatter.format(record);
       out.write(msg);
       System.err.print(msg);
