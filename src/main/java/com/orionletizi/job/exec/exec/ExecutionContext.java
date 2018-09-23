@@ -30,7 +30,7 @@ public class ExecutionContext {
     return command;
   }
 
-  public synchronized void notifyComplete(final ExecutionResult result) throws InterruptedException {
+  public synchronized void notifyComplete(final ExecutionResult result) {
     logger.info("notifyComplete(result: " + result + ")");
     if (this.result != null) {
       throw new RuntimeException("Attempt to notify complete more than once!");

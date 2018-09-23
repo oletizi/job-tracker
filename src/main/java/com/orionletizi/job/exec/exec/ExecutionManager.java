@@ -30,11 +30,7 @@ public class ExecutionManager {
       contextsById.put(ctxt.getId(), ctxt);
     }
     job.addExecutionContext(ctxt);
-    try {
-      engine.execute(ctxt);
-    } catch (InterruptedException e) {
-      throw new RuntimeException(e);
-    }
+    engine.execute(ctxt);
     return ctxt;
   }
 

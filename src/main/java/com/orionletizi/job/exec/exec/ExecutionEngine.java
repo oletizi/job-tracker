@@ -4,6 +4,6 @@ import com.orionletizi.job.Job;
 
 public interface ExecutionEngine {
 
-  void execute(ExecutionContext ctxt) throws InterruptedException;
+  void execute(ExecutionContext ctxt);
 
 }
