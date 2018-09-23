@@ -5,6 +5,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -26,7 +28,16 @@ public class JobManagerTest {
       return null;
     }).when(executionEngine).run(any(ExecutionContext.class));
 
-    manager = new JobManager(1, executionEngine);
+    manager = new JobManager(10, executionEngine);
+  }
+
+  @Test
+  public void testGetJobs() {
+    final Collection<Job> expected = new LinkedList<>();
+    expected.add(manager.newJob("job 1"));
+    expected.add(manager.newJob("job 2"));
+
+    assertEquals(expected, manager.getJobs());
   }
 
   @Test
@@ -63,6 +74,7 @@ public class JobManagerTest {
 
   @Test
   public void testJobRetention() {
+    manager = new JobManager(1, executionEngine);
     final Job firstJob = manager.newJob("first job");
     assertEquals(firstJob, manager.getJobById(firstJob.getId()));
 

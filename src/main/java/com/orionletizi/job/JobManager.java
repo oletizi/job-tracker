@@ -5,9 +5,7 @@ import com.orionletizi.job.exec.ExecutionContext;
 import com.orionletizi.job.exec.ExecutionEngine;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
@@ -37,6 +35,15 @@ public class JobManager {
       retentionQueue.add(job);
     }
     return job;
+  }
+
+  public Collection<Job> getJobs() {
+    final List<Job> rv;
+    synchronized (jobsById) {
+      rv = new ArrayList<>(jobsById.values());
+    }
+    rv.sort(Comparator.comparing(Job::getId));
+    return rv;
   }
 
   private String nextId() {
