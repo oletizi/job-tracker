@@ -1,19 +1,19 @@
-package com.orionletizi.job.exec.exec;
+package com.orionletizi.job.exec;
 
 public class ExecutionResult {
 
   private String outLog;
   private String errLog;
   private int status;
-  private Exception exception;
+  private Throwable throwable;
 
 
   void setStatus(int status) {
     this.status = status;
   }
 
-  void setException(Exception e) {
-    this.exception = e;
+  void setThrowable(Throwable t) {
+    this.throwable = t;
   }
 
   void setStdoutName(String outLog) {
@@ -36,8 +36,8 @@ public class ExecutionResult {
     return status;
   }
 
-  public Exception getException() {
-    return exception;
+  public Throwable getThrowable() {
+    return throwable;
   }
 
 }

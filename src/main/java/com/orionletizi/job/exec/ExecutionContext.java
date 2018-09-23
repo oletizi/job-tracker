@@ -1,11 +1,12 @@
-package com.orionletizi.job.exec.exec;
+package com.orionletizi.job.exec;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import logging.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class ExecutionContext {
@@ -22,12 +23,35 @@ public class ExecutionContext {
     this.command = command;
   }
 
+  @JsonProperty
   public String getId() {
     return id;
   }
 
-  public String[] getCommand() {
-    return command;
+  @JsonProperty
+  public List<String> getCommand() {
+    return Arrays.asList(command);
+  }
+
+
+  @JsonProperty
+  public String getStdoutName() {
+    return stdoutName;
+  }
+
+  @JsonProperty
+  public String getStderrName() {
+    return stderrName;
+  }
+
+  ExecutionContext setStdoutName(String stdoutName) {
+    this.stdoutName = stdoutName;
+    return this;
+  }
+
+  ExecutionContext setStderrName(String stderrName) {
+    this.stderrName = stderrName;
+    return this;
   }
 
   public synchronized void notifyComplete(final ExecutionResult result) {
@@ -42,7 +66,7 @@ public class ExecutionContext {
   }
 
 
-  public synchronized void listenForCompletion(CompletionListener listener) {
+  public synchronized void onCompletion(CompletionListener listener) {
     if (result != null) {
       // we're already complete
       listener.notifyComplete(result);
@@ -50,24 +74,6 @@ public class ExecutionContext {
       // still waiting for completion.
       listeners.add(listener);
     }
-  }
-
-  public String getStdoutName() {
-    return stdoutName;
-  }
-
-  public ExecutionContext setStdoutName(String stdoutName) {
-    this.stdoutName = stdoutName;
-    return this;
-  }
-
-  public String getStderrName() {
-    return stderrName;
-  }
-
-  public ExecutionContext setStderrName(String stderrName) {
-    this.stderrName = stderrName;
-    return this;
   }
 
 }

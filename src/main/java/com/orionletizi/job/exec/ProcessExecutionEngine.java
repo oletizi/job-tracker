@@ -1,12 +1,14 @@
-package com.orionletizi.job.exec.exec;
+package com.orionletizi.job.exec;
 
 import logging.LoggerFactory;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
 
 import java.io.*;
+import java.util.Date;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
 
 public class ProcessExecutionEngine implements ExecutionEngine {
@@ -57,41 +59,57 @@ public class ProcessExecutionEngine implements ExecutionEngine {
         logger.info("Starting process for: " + ctxt);
         final Process proc = builder.start();
 
-        final PipedOutputStream outSink = new PipedOutputStream();
-        final PipedOutputStream errSink = new PipedOutputStream();
 
+
+        logger.info("Setting up output handling...");
+        // create some piped output streams to
+        final OutputStream outFileStream = new FileOutputStream(outLog);
+        final OutputStream errFileStream = new FileOutputStream(errLog);
 
         // Tee output and error streams
-        logger.info("Setting up output handling...");
-        final TeeOutputStream out = new TeeOutputStream(System.out, outSink);
-        final TeeOutputStream err = new TeeOutputStream(System.err, errSink);
+        final TeeOutputStream out = new TeeOutputStream(System.out, outFileStream);
+        final TeeOutputStream err = new TeeOutputStream(System.err, errFileStream);
 
 
-        IO_PUMP.submit(new StreamSink(new PipedInputStream(outSink), outLog));
-        IO_PUMP.submit(new StreamSink(new PipedInputStream(errSink), errLog));
-        IO_PUMP.submit(new StreamPump(proc.getInputStream(), out));
-        IO_PUMP.submit(new StreamPump(proc.getErrorStream(), err));
+//        final StreamSink outSink = new StreamSink(new PipedInputStream(outSinkStream), outLog);
+//        final StreamSink errSink = new StreamSink(new PipedInputStream(errSinkStream), errLog);
+        final StreamPump outPump = new StreamPump(proc.getInputStream(), out);
+        final StreamPump errPump = new StreamPump(proc.getErrorStream(), err);
+
+        synchronized (IO_PUMP) {
+          IO_PUMP.submit(outPump);
+          IO_PUMP.submit(errPump);
+        }
 
 
         logger.info("Waiting for process: " + ctxt);
         final int status = proc.waitFor();
+
         logger.info("Process complete. Status: " + status);
 
         result.setStatus(status);
 
-      } catch (IOException | InterruptedException e) {
+        logger.info("Waiting for STDOUT sink...");
+        outPump.waitFor();
+
+        logger.info("Waiting for STDERR sink...");
+        errPump.waitFor();
+
+        logger.info("Notifying complete...");
+        ctxt.notifyComplete(result);
+
+      } catch (Throwable e) {
         result.setStatus(STATUS_BARF);
-        result.setException(e);
+        result.setThrowable(e);
         e.printStackTrace();
       }
-      logger.info("Return result: " + result);
-      ctxt.notifyComplete(result);
     });
 
   }
 
   private static class StreamPump implements Runnable {
 
+    private final BlockingQueue<Date> completionQueue = new LinkedBlockingQueue<>();
     private final InputStream in;
     private final OutputStream out;
 
@@ -103,33 +121,31 @@ public class ProcessExecutionEngine implements ExecutionEngine {
     @Override
     public void run() {
       try {
-        IOUtils.copy(in, out);
+        byte[] buf = new byte[2048];
+        int bytesRead;
+        while ((bytesRead = in.read(buf)) != 0) {
+          out.write(buf, 0, bytesRead);
+        }
         out.close();
       } catch (IOException e) {
         e.printStackTrace();
+      } finally {
+        complete();
       }
     }
-  }
 
-  private static class StreamSink implements Runnable {
-
-    private final InputStream in;
-    private File outFile;
-
-    StreamSink(final InputStream in, final File outFile) {
-      this.in = in;
-      this.outFile = outFile;
+    void complete() {
+      completionQueue.offer(new Date());
     }
 
-    @Override
-    public void run() {
+    void waitFor() {
       try {
-        final FileOutputStream out = new FileOutputStream(outFile);
-        IOUtils.copy(in, out);
-        out.close();
-      } catch (IOException e) {
-        e.printStackTrace();
+        final Date completed = completionQueue.take();
+        logger.info("Pump completed: " + completed);
+      } catch (InterruptedException e) {
+        throw new RuntimeException(e);
       }
     }
   }
+
 }

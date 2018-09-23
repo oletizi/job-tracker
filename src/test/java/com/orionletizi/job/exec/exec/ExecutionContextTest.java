@@ -1,5 +1,8 @@
 package com.orionletizi.job.exec.exec;
 
+import com.orionletizi.job.exec.CompletionListener;
+import com.orionletizi.job.exec.ExecutionContext;
+import com.orionletizi.job.exec.ExecutionResult;
 import logging.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +42,7 @@ public class ExecutionContextTest {
       }
     };
 
-    ctxt.listenForCompletion(listener);
+    ctxt.onCompletion(listener);
     ctxt.notifyComplete(result);
 
     // check to see if the completion listeners are notified
@@ -47,7 +50,7 @@ public class ExecutionContextTest {
     assertEquals(result, completionQueue.take());
 
     // check to see if new listeners added after completion are notified
-    ctxt.listenForCompletion(listener);
+    ctxt.onCompletion(listener);
     assertEquals(1, completionQueue.size());
     assertEquals(result, completionQueue.take());
   }

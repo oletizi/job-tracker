@@ -1,7 +1,7 @@
 package com.orionletizi.job;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.orionletizi.job.exec.exec.ExecutionContext;
+import com.orionletizi.job.exec.ExecutionContext;
 import logging.LoggerFactory;
 
 import java.time.OffsetDateTime;

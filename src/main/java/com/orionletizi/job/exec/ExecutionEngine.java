@@ -1,6 +1,4 @@
-package com.orionletizi.job.exec.exec;
-
-import com.orionletizi.job.Job;
+package com.orionletizi.job.exec;
 
 public interface ExecutionEngine {
 
