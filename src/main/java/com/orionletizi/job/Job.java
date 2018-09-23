@@ -1,6 +1,7 @@
 package com.orionletizi.job;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.orionletizi.job.exec.exec.ExecutionContext;
 import logging.LoggerFactory;
 
 import java.time.OffsetDateTime;
@@ -14,7 +15,6 @@ public class Job {
   private static final Logger logger = new LoggerFactory().getLoggerFor(Job.class);
   private final CountDownLatch closeLatch = new CountDownLatch(1);
   private static final DateTimeFormatter df = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
-  static final Job NULL_JOB = new NullJob();
   private String id;
   private String startTime = timestamp();
   private String stopTime = "UNKNOWN";
@@ -24,19 +24,21 @@ public class Job {
   private Map<String, String> stderr = new HashMap<>();
   private List<ActionLogEntry> log = new ArrayList<>();
   private boolean isOpen = true;
+  private final Collection<ExecutionContext> executionContexts = new ArrayList<>();
 
   @SuppressWarnings("unused")
   Job() {
     // noop for object mapper
   }
 
-  public Job(final String id, final String action) {
+  Job(final String id, final String action) {
     this.id = id;
     this.action = action;
   }
 
   /** Properties **/
 
+  @SuppressWarnings("WeakerAccess")
   @JsonProperty
   public String getId() {
     return id;
@@ -48,28 +50,12 @@ public class Job {
   }
 
   @JsonProperty
-  public synchronized Collection<ActionLogEntry> getLog() {
-    return new ArrayList<>(log);
+  public synchronized Collection<ExecutionContext> getExecutionLog() {
+    return new ArrayList<>(executionContexts);
   }
 
-  @JsonProperty
-  synchronized Map<String, String> getStdout() {
-    return new HashMap<>(stdout);
-  }
-
-  public synchronized void addStdout(final String command, final String filePath) {
-    checkOpen();
-    this.stdout.put(command, filePath);
-  }
-
-  @JsonProperty
-  synchronized Map<String, String> getStderr() {
-    return new HashMap<>(stderr);
-  }
-
-  public synchronized void addStderr(final String command, final String filePath) {
-    checkOpen();
-    this.stderr.put(command, filePath);
+  public void addExecutionContext(ExecutionContext ctxt) {
+    executionContexts.add(ctxt);
   }
 
   @JsonProperty
@@ -88,11 +74,6 @@ public class Job {
   }
 
   /** Logic **/
-
-  synchronized void logAction(final String status, final String message) {
-    checkOpen();
-    log.add(new ActionLogEntry(timestamp(), action, status, message));
-  }
 
   synchronized void close(final String status) {
     logger.info("Closing job: " + id);
@@ -116,22 +97,6 @@ public class Job {
   private void checkOpen() {
     if (! isOpen){
       throw new IllegalStateException("Attempt to modify a closed job");
-    }
-  }
-
-  private static class NullJob extends Job {
-
-    private NullJob() {
-      super("UNKOWN", "NULL");
-    }
-
-    @Override
-    void logAction(final String status, final String message) {
-      // noop;
-    }
-
-    @Override
-    void waitUntilClosed() {
     }
   }
 

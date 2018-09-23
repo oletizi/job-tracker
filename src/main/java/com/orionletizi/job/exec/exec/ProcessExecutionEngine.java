@@ -10,29 +10,29 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
-public class ProcessExecutionContext implements ExecutionContext {
+public class ProcessExecutionEngine implements ExecutionEngine {
 
-  private static final Logger logger = new LoggerFactory().getLoggerFor(ProcessExecutionContext.class);
+  private static final Logger logger = new LoggerFactory().getLoggerFor(ProcessExecutionEngine.class);
   private static final int STATUS_BARF = -1 * (0xba * 0xf);
   private static final ExecutorService IO_PUMP = Executors.newFixedThreadPool(4);
   private final File tmpDir;
 
-  public ProcessExecutionContext(final File tmpDir) {
+  public ProcessExecutionEngine(final File tmpDir) {
 
     this.tmpDir = tmpDir;
   }
 
   @Override
-  public ExecutionResult execute(Job job, final String pathToExecutable) {
-    logger.info("Executing job: " + job.getAction() + "; id: " + job.getId());
+  public void execute(final ExecutionContext ctxt) throws InterruptedException {
     final ExecutionResult result = new ExecutionResult();
-    final ProcessBuilder builder = new ProcessBuilder(pathToExecutable);
+
+    final ProcessBuilder builder = new ProcessBuilder(ctxt.getCommand());
 
     try {
-      final File outLog = File.createTempFile(job.getAction() + "-stdout-", ".txt", tmpDir);
+      final File outLog = File.createTempFile(ctxt.getId() + "-stdout-", ".txt", tmpDir);
       outLog.deleteOnExit();
 
-      final File errLog = File.createTempFile(job.getAction() + "-stderr-", ".txt", tmpDir);
+      final File errLog = File.createTempFile(ctxt.getId() + "-stderr-", ".txt", tmpDir);
       outLog.deleteOnExit();
 
       logger.info("STDOUT log: " + outLog);
@@ -43,12 +43,12 @@ public class ProcessExecutionContext implements ExecutionContext {
       String errLogName = errLog.getName();
 
       result.setOutLog(outLogName);
-      job.addStdout(pathToExecutable, outLogName);
+      ctxt.addStdout(outLogName);
 
       result.setErrLog(errLogName);
-      job.addStderr(pathToExecutable, errLogName);
+      ctxt.addStderr(errLogName);
 
-      logger.info("Starting process for: " + pathToExecutable);
+      logger.info("Starting process for: " + ctxt);
       final Process proc = builder.start();
 
       final PipedOutputStream outSink = new PipedOutputStream();
@@ -68,7 +68,7 @@ public class ProcessExecutionContext implements ExecutionContext {
       IO_PUMP.submit(new StreamPump(proc.getErrorStream(), err));
 
 
-      logger.info("Waiting for process: " + pathToExecutable);
+      logger.info("Waiting for process: " + ctxt);
       final int status = proc.waitFor();
       logger.info("Process complete. Status: " + status);
 
@@ -80,7 +80,7 @@ public class ProcessExecutionContext implements ExecutionContext {
       e.printStackTrace();
     }
     logger.info("Return result: " + result);
-    return result;
+    ctxt.notifyComplete(result);
   }
 
   private static class StreamPump implements Runnable {

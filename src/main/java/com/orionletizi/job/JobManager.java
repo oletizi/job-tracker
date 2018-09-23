@@ -1,6 +1,7 @@
 package com.orionletizi.job;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -27,5 +28,9 @@ public class JobManager {
     synchronized(jobsById) {
       return jobsById.get(id);
     }
+  }
+
+  public void execute(String jobId, List<String> commands) {
+
   }
 }
