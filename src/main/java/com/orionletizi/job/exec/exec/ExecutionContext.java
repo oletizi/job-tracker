@@ -17,7 +17,7 @@ public class ExecutionContext {
   private Collection<CompletionListener> listeners = new ArrayList<>();
   private ExecutionResult result;
 
-  ExecutionContext(final String id, final String[] command) {
+  public ExecutionContext(final String id, final String[] command) {
     this.id = id;
     this.command = command;
   }
