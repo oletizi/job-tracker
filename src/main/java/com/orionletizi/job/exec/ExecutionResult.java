@@ -1,16 +1,16 @@
 package com.orionletizi.job.exec;
 
+@SuppressWarnings("WeakerAccess")
 public class ExecutionResult {
 
   private int status;
   private Throwable throwable;
 
-
-  void setStatus(int status) {
+  public void setStatus(int status) {
     this.status = status;
   }
 
-  void setThrowable(Throwable t) {
+  public void setThrowable(Throwable t) {
     this.throwable = t;
   }
 
