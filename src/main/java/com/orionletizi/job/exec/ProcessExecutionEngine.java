@@ -51,10 +51,8 @@ public class ProcessExecutionEngine extends RunnableExecutionEngine {
         String outLogName = outLog.getName();
         String errLogName = errLog.getName();
 
-        result.setStdoutName(outLogName);
         ctxt.setStdoutName(outLogName);
 
-        result.setStderrName(errLogName);
         ctxt.setStderrName(errLogName);
 
         logger.info("Starting process for: " + ctxt);

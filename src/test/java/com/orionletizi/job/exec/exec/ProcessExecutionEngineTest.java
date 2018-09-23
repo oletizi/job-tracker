@@ -57,7 +57,7 @@ public class ProcessExecutionEngineTest {
         logger.info("Status: " + status);
         assertEquals(0, status);
 
-        final String stdoutName = result.getOutLog();
+        final String stdoutName = ctxt.getStdoutName();
         final File stdoutFile = new File(logFolder, stdoutName);
         logger.info("stdout: " + stdoutFile);
         assertTrue(stdoutFile.isFile());
@@ -99,7 +99,7 @@ public class ProcessExecutionEngineTest {
         logger.info("Status: " + status);
         assertNotEquals(0, status);
 
-        final String stderrName = result.getErrLog();
+        final String stderrName = ctxt.getStderrName();
         final File stderrFile = new File(this.logFolder, stderrName);
         logger.info("stderrFile: " + stderrFile);
         logger.info("stderrFile.isFile(): " + stderrFile.isFile());
