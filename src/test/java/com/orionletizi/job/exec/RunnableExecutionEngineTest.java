@@ -89,6 +89,11 @@ public class RunnableExecutionEngineTest {
       }
 
       @Override
+      public String getName() {
+        return "my name";
+      }
+
+      @Override
       public void run() {
         logger.info("Info");
         logger.warning("Warning");

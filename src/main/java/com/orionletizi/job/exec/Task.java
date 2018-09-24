@@ -5,4 +5,6 @@ public interface Task extends Runnable {
   void onCompletion(final CompletionListener listener);
 
   void setLogger(final ExecutableLogger logger);
+
+  String getName();
 }
