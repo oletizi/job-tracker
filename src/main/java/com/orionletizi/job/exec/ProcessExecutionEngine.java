@@ -82,7 +82,7 @@ public class ProcessExecutionEngine extends RunnableExecutionEngine {
         logger.info("Waiting for process: " + ctxt);
         final int status = proc.waitFor();
 
-        logger.info("Process complete. Status: " + status);
+        logger.info("Process isComplete. Status: " + status);
 
         result.setStatus(status);
 
@@ -92,7 +92,7 @@ public class ProcessExecutionEngine extends RunnableExecutionEngine {
         logger.info("Waiting for STDERR sink...");
         errPump.waitFor();
 
-        logger.info("Notifying complete...");
+        logger.info("Notifying isComplete...");
         ctxt.notifyComplete(result);
 
       } catch (Throwable e) {

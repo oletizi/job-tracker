@@ -2,17 +2,17 @@ package com.orionletizi.job.exec;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-public class CompletionHandlerTest {
+public class LifecycleHandlerTest {
 
   @Test
   public void testBasics() {
-    final CompletionHandler handler = new CompletionHandler();
+    final Status status = mock(Status.class);
+    final LifecycleHandler handler = new LifecycleHandler(status);
 
     final ExecutionResult result = mock(ExecutionResult.class);
     final CompletionListener listener1 = mock(CompletionListener.class);
@@ -28,6 +28,9 @@ public class CompletionHandlerTest {
 
     // call notifyComplete on the handler
     handler.notifyComplete(result);
+
+    // verify the status object got updated
+    verify(status, times(1)).stop();
 
     // verify listener1 has been notified once
     // verify listener2 has not been notified

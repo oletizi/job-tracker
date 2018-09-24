@@ -9,9 +9,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
+@SuppressWarnings({"unused", "WeakerAccess"})
 public class ExecutionContext {
   private static final Logger logger = new LoggerFactory().getLoggerFor(ExecutionContext.class);
-  private final CompletionHandler completionHandler = new CompletionHandler();
+  private final Status status = new Status();
+  private final LifecycleHandler lifecycleHandler = new LifecycleHandler(status);
   private final String id;
   private final String[] command;
   private final Task task;
@@ -52,23 +54,26 @@ public class ExecutionContext {
     return stderrName;
   }
 
-  ExecutionContext setStdoutName(String stdoutName) {
-    this.stdoutName = stdoutName;
-    return this;
+  @JsonProperty
+  public String complete() {
+    return lifecycleHandler.isComplete() ? "COMPLETE" : "IN-PROGRESS";
   }
 
-  ExecutionContext setStderrName(String stderrName) {
+  void setStdoutName(String stdoutName) {
+    this.stdoutName = stdoutName;
+  }
+
+  void setStderrName(String stderrName) {
     this.stderrName = stderrName;
-    return this;
   }
 
   public synchronized void notifyComplete(final ExecutionResult result) {
-    completionHandler.notifyComplete(result);
+    lifecycleHandler.notifyComplete(result);
   }
 
 
   public synchronized void onCompletion(CompletionListener listener) {
-    completionHandler.onCompletion(listener);
+    lifecycleHandler.onCompletion(listener);
   }
 
   public Task getTask() {
