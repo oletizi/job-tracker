@@ -29,7 +29,7 @@ public class ExecutionContext {
   public ExecutionContext(final String id, final Task task) {
     this.id = id;
     this.task = task;
-    this.command = null;
+    this.command = new String[0];
   }
 
   @JsonProperty
