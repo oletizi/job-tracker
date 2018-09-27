@@ -1,5 +1,6 @@
 package com.orionletizi.job.task;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.orionletizi.job.lifecycle.LifecycleContext;
 import com.orionletizi.job.lifecycle.LifecycleListener;
 
@@ -7,8 +8,11 @@ import java.io.IOException;
 
 public abstract class AbstractTask implements Task {
 
-  private final LifecycleContext ctxt = new LifecycleContext();
   private TaskLogger logger;
+
+  @JsonProperty
+  private final LifecycleContext ctxt = new LifecycleContext();
+  @JsonProperty
   private String name;
 
   @SuppressWarnings("WeakerAccess")
