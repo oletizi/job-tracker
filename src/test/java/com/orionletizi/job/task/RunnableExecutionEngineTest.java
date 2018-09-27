@@ -46,6 +46,8 @@ public class RunnableExecutionEngineTest {
     completionQueue.take();
 
     verify(task, times(1)).run();
+
+    verify(task, times(1)).setLogger(any(TaskLogger.class));
   }
 
   static class TestableRunnableExecutionEngine extends RunnableExecutionEngine {
