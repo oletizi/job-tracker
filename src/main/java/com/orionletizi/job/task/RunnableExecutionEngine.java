@@ -1,4 +1,4 @@
-package com.orionletizi.job.exec;
+package com.orionletizi.job.task;
 
 import java.io.*;
 import java.util.concurrent.ExecutorService;
@@ -14,7 +14,7 @@ public abstract class RunnableExecutionEngine implements ExecutionEngine {
   }
 
   @Override
-  public void run(ExecutionContext ctxt) {
+  public void run(final ExecutionContext ctxt) {
     try {
       final File errfile = new File(tmpDir, ctxt.getId() + "-stderr");
       final BufferedWriter err = new BufferedWriter(new FileWriter(errfile));
@@ -22,18 +22,8 @@ public abstract class RunnableExecutionEngine implements ExecutionEngine {
       ctxt.setStderrName(errfile.getName());
 
       final Task task = ctxt.getTask();
-      task.setLogger(new ExecutableLogger(task, err));
+      task.setLogger(new TaskLogger(task, err));
 
-      task.onCompletion(result -> {
-        // close writers
-        try {
-          err.close();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
-        // notify the context that it is isComplete.
-        ctxt.notifyComplete(result);
-      });
       executorService.submit(task);
     } catch (IOException e) {
       throw new RuntimeException(e);

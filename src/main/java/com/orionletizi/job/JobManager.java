@@ -1,8 +1,9 @@
 package com.orionletizi.job;
 
-import com.orionletizi.job.exec.Task;
-import com.orionletizi.job.exec.ExecutionContext;
-import com.orionletizi.job.exec.ExecutionEngine;
+import com.orionletizi.job.task.Command;
+import com.orionletizi.job.task.Task;
+import com.orionletizi.job.task.ExecutionContext;
+import com.orionletizi.job.task.ExecutionEngine;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 import java.util.*;
@@ -57,7 +58,7 @@ public class JobManager {
   }
 
   public void execute(final String jobId, String[] command) {
-    executionEngine.execute(prepareNewExecutionContext(jobId, new ExecutionContext(nextId(), command)));
+    executionEngine.execute(prepareNewExecutionContext(jobId, new ExecutionContext(nextId(), new Command(command))));
   }
 
   public void execute(final String jobId, final List<String[]> commands) {

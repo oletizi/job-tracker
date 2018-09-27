@@ -1,4 +1,4 @@
-package com.orionletizi.job.exec;
+package com.orionletizi.job.task;
 
 import logging.LoggerFactory;
 import org.apache.commons.io.output.TeeOutputStream;
@@ -14,7 +14,6 @@ import java.util.logging.Logger;
 public class ProcessExecutionEngine extends RunnableExecutionEngine {
 
   private static final Logger logger = new LoggerFactory().getLoggerFor(ProcessExecutionEngine.class);
-  private static final int STATUS_BARF = -1 * (0xba * 0xf);
   private static final ExecutorService IO_PUMP = Executors.newFixedThreadPool(4);
   private final File tmpDir;
   private final ExecutorService executor;
@@ -27,15 +26,13 @@ public class ProcessExecutionEngine extends RunnableExecutionEngine {
 
   /**
    * Asynchronously executes the command described in the execution context
-   *
-   * @param ctxt
    */
   @Override
   public void execute(final ExecutionContext ctxt) {
-    final ExecutionResult result = new ExecutionResult();
     executor.submit(() -> {
 
-      final ProcessBuilder builder = new ProcessBuilder(ctxt.getCommand());
+      final Command command = ctxt.getCommand();
+      final ProcessBuilder builder = new ProcessBuilder(command.getCommand());
 
       try {
         final File outLog = File.createTempFile(ctxt.getId() + "-stdout-", ".txt", tmpDir);
@@ -56,9 +53,10 @@ public class ProcessExecutionEngine extends RunnableExecutionEngine {
         ctxt.setStderrName(errLogName);
 
         logger.info("Starting process for: " + ctxt);
+
+        command.started();
+
         final Process proc = builder.start();
-
-
 
         logger.info("Setting up output handling...");
         // create some piped output streams to
@@ -84,21 +82,15 @@ public class ProcessExecutionEngine extends RunnableExecutionEngine {
 
         logger.info("Process isComplete. Status: " + status);
 
-        result.setStatus(status);
-
         logger.info("Waiting for STDOUT sink...");
         outPump.waitFor();
 
         logger.info("Waiting for STDERR sink...");
         errPump.waitFor();
-
-        logger.info("Notifying isComplete...");
-        ctxt.notifyComplete(result);
-
-      } catch (Throwable e) {
-        result.setStatus(STATUS_BARF);
-        result.setThrowable(e);
-        e.printStackTrace();
+        command.completed();
+      } catch (final Throwable t) {
+        command.error(t);
+        t.printStackTrace();
       }
     });
 

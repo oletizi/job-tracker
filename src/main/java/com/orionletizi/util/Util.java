@@ -1,4 +1,4 @@
-package com.orionletizi.job.com.orionletizi.util;
+package com.orionletizi.util;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

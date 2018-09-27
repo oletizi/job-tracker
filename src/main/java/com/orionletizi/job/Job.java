@@ -1,30 +1,28 @@
 package com.orionletizi.job;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.orionletizi.job.exec.ExecutionContext;
+import com.orionletizi.job.task.ExecutionContext;
+import com.orionletizi.job.lifecycle.LifecycleContext;
+import com.orionletizi.job.lifecycle.LifecycleListener;
+import com.orionletizi.job.lifecycle.Status;
 import logging.LoggerFactory;
 
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.CountDownLatch;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
 
-@SuppressWarnings("unused")
-public class Job {
+@SuppressWarnings({"unused", "WeakerAccess"})
+public class Job implements LifecycleListener {
   private static final Logger logger = new LoggerFactory().getLoggerFor(Job.class);
-  private final CountDownLatch closeLatch = new CountDownLatch(1);
-  private static final DateTimeFormatter df = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
   private String id;
-  private String startTime = timestamp();
-  private String stopTime = "UNKNOWN";
   private String action;
-  private String status = "in progress";
-  private Map<String, String> stdout = new HashMap<>();
-  private Map<String, String> stderr = new HashMap<>();
-  private List<ActionLogEntry> log = new ArrayList<>();
   private boolean isOpen = true;
   private final Collection<ExecutionContext> executionContexts = new ArrayList<>();
+  private final Status status = new Status();
+
+  @JsonProperty
+  private final LifecycleContext lifecycle = new LifecycleContext();
 
   @SuppressWarnings("unused")
   Job() {
@@ -36,9 +34,12 @@ public class Job {
     this.action = action;
   }
 
-  /** Properties **/
+  public void addExecutionContext(final ExecutionContext ctxt) {
+    executionContexts.add(ctxt);
+  }
 
-  @SuppressWarnings("WeakerAccess")
+  // Properties
+
   @JsonProperty
   public String getId() {
     return id;
@@ -49,55 +50,27 @@ public class Job {
     return action;
   }
 
+  public void onLifecycleEvent(final LifecycleListener listener) {
+    lifecycle.onLifecycleEvent(listener);
+  }
+
   @JsonProperty
   public synchronized List<ExecutionContext> getExecutions() {
     return new ArrayList<>(executionContexts);
   }
 
-  public void addExecutionContext(ExecutionContext ctxt) {
-    executionContexts.add(ctxt);
+  @Override
+  public void started() {
+    lifecycle.started();
   }
 
-  @JsonProperty
-  public synchronized String getStatus() {
-    return status;
+  @Override
+  public void completed() {
+    lifecycle.completed();
   }
 
-  @JsonProperty
-  public String getStartTime() {
-    return startTime;
+  @Override
+  public void error(Throwable t) {
+    lifecycle.error(t);
   }
-
-  @JsonProperty
-  public String getStopTime() {
-    return stopTime;
-  }
-
-  /** Logic **/
-
-  synchronized void close(final String status) {
-    logger.info("Closing job: " + id);
-    isOpen = false;
-    this.status = status;
-    closeLatch.countDown();
-    logger.info("Done closing job: " + id);
-    stopTime = timestamp();
-  }
-
-  private String timestamp() {
-    return df.format(OffsetDateTime.now());
-  }
-
-  synchronized void waitUntilClosed() throws InterruptedException {
-    logger.info("Waiting until job is closed: " + id + "...");
-    closeLatch.await();
-    logger.info("Done waiting for job close: " + id);
-  }
-
-  private void checkOpen() {
-    if (! isOpen){
-      throw new IllegalStateException("Attempt to modify a closed job");
-    }
-  }
-
 }

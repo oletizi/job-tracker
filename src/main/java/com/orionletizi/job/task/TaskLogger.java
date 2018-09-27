@@ -1,4 +1,4 @@
-package com.orionletizi.job.exec;
+package com.orionletizi.job.task;
 
 import logging.JobLogFormatter;
 
@@ -8,12 +8,12 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 @SuppressWarnings("WeakerAccess")
-public final class ExecutableLogger {
+public final class TaskLogger {
   private final JobLogFormatter formatter = new JobLogFormatter();
   private final Task task;
   private final Writer out;
 
-  public ExecutableLogger(final Task task, final Writer out) {
+  public TaskLogger(final Task task, final Writer out) {
     this.task = task;
     this.out = out;
   }
@@ -41,5 +41,9 @@ public final class ExecutableLogger {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  public void close() throws IOException {
+    out.close();
   }
 }

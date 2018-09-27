@@ -1,6 +1,6 @@
 package com.orionletizi.job;
 
-import com.orionletizi.job.exec.*;
+import com.orionletizi.job.task.*;
 import org.junit.Before;
 import org.junit.Test;
 
