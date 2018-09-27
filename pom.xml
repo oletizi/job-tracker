@@ -4,7 +4,7 @@
   <groupId>com.orionletizi</groupId>
   <artifactId>job-tracker</artifactId>
   <packaging>jar</packaging>
-  <version>1.5.7_3</version>
+  <version>1.5.7_4</version>
   <name>job-tracker</name>
   <url>https://github.com/oletizi/job-tracker</url>
 

@@ -5,9 +5,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class AbstractTaskTest {
@@ -46,13 +45,25 @@ public class AbstractTaskTest {
 
   static final class TestTask extends AbstractTask {
 
+    private TaskLogger logger;
+
     TestTask(final String name) {
       super(name);
     }
 
     @Override
+    TaskLogger getLogger() {
+      return logger;
+    }
+
+    @Override
     public void run() {
       // noop
+    }
+
+    @Override
+    public void setLogger(TaskLogger logger) {
+      this.logger = logger;
     }
   }
 }

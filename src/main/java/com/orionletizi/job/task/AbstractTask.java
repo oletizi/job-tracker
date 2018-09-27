@@ -8,8 +8,6 @@ import java.io.IOException;
 
 public abstract class AbstractTask implements Task {
 
-  private TaskLogger logger;
-
   @JsonProperty
   private final LifecycleContext lifecycle = new LifecycleContext();
 
@@ -26,15 +24,8 @@ public abstract class AbstractTask implements Task {
     lifecycle.onLifecycleEvent(listener);
   }
 
-  @Override
-  public void setLogger(TaskLogger logger) {
-    this.logger = logger;
-  }
 
-  @SuppressWarnings("unused")
-  protected TaskLogger getLogger() {
-    return logger;
-  }
+  abstract TaskLogger getLogger();
 
   @Override
   public String getName() {
@@ -49,22 +40,23 @@ public abstract class AbstractTask implements Task {
   @Override
   public void completed() {
     lifecycle.completed();
-    try {
-      logger.close();
-    } catch (IOException e) {
-      lifecycle.error(e);
-      throw new RuntimeException(e);
-    }
+    closeLogger();
   }
 
   @Override
   public void error(Throwable t) {
     lifecycle.error(t);
-    try {
-      logger.close();
-    } catch (IOException e) {
-      // XXX: Probably need to add support for multiple errors to the lifecycle stuff
-      e.printStackTrace();
+    closeLogger();
+  }
+
+  private void closeLogger() {
+    final TaskLogger logger = getLogger();
+    if (logger != null) {
+      try {
+        logger.close();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }
