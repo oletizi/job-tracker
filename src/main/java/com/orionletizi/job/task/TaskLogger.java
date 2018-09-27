@@ -8,7 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 @SuppressWarnings("WeakerAccess")
-public final class TaskLogger {
+public class TaskLogger {
   private final JobLogFormatter formatter = new JobLogFormatter();
   private final Task task;
   private final Writer out;
