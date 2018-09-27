@@ -25,7 +25,7 @@ public abstract class AbstractTask implements Task {
   }
 
 
-  abstract TaskLogger getLogger();
+  protected abstract TaskLogger getLogger();
 
   @Override
   public String getName() {

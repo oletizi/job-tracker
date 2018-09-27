@@ -52,7 +52,7 @@ public class AbstractTaskTest {
     }
 
     @Override
-    TaskLogger getLogger() {
+    protected TaskLogger getLogger() {
       return logger;
     }
 
