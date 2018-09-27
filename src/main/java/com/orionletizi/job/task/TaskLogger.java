@@ -18,14 +18,17 @@ public class TaskLogger {
     this.out = out;
   }
 
+  @SuppressWarnings("unused")
   public void info(final Object msg) {
     write(new LogRecord(Level.INFO, "" + msg));
   }
 
+  @SuppressWarnings("unused")
   public void warning(final Object msg) {
     write(new LogRecord(Level.WARNING, "" + msg));
   }
 
+  @SuppressWarnings("unused")
   public void error(final Throwable t) {
     final LogRecord record = new LogRecord(Level.SEVERE, t.getMessage());
     record.setThrown(t);

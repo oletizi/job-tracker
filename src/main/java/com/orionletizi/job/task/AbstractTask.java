@@ -11,7 +11,8 @@ public abstract class AbstractTask implements Task {
   private TaskLogger logger;
   private String name;
 
-  AbstractTask(final String name) {
+  @SuppressWarnings("WeakerAccess")
+  protected AbstractTask(final String name) {
     this.name = name;
   }
 
@@ -25,7 +26,8 @@ public abstract class AbstractTask implements Task {
     this.logger = logger;
   }
 
-  TaskLogger getLogger() {
+  @SuppressWarnings("unused")
+  protected TaskLogger getLogger() {
     return logger;
   }
 
