@@ -11,7 +11,8 @@ public abstract class AbstractTask implements Task {
   private TaskLogger logger;
 
   @JsonProperty
-  private final LifecycleContext ctxt = new LifecycleContext();
+  private final LifecycleContext lifecycle = new LifecycleContext();
+
   @JsonProperty
   private String name;
 
@@ -22,7 +23,7 @@ public abstract class AbstractTask implements Task {
 
   @Override
   public void onLifecycleEvent(LifecycleListener listener) {
-    ctxt.onLifecycleEvent(listener);
+    lifecycle.onLifecycleEvent(listener);
   }
 
   @Override
@@ -42,23 +43,23 @@ public abstract class AbstractTask implements Task {
 
   @Override
   public void started() {
-    ctxt.started();
+    lifecycle.started();
   }
 
   @Override
   public void completed() {
-    ctxt.completed();
+    lifecycle.completed();
     try {
       logger.close();
     } catch (IOException e) {
-      ctxt.error(e);
+      lifecycle.error(e);
       throw new RuntimeException(e);
     }
   }
 
   @Override
   public void error(Throwable t) {
-    ctxt.error(t);
+    lifecycle.error(t);
     try {
       logger.close();
     } catch (IOException e) {
