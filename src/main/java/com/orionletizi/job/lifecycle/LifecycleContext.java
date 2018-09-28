@@ -1,5 +1,6 @@
 package com.orionletizi.job.lifecycle;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.ArrayList;
@@ -85,7 +86,7 @@ public class LifecycleContext implements LifecycleListener {
 
   @JsonProperty
   public synchronized String getError() {
-    return throwable != null ? throwable.getMessage() : "";
+    return throwable != null ? throwable.getClass().getSimpleName() + ": " + throwable.getMessage() : "";
   }
 
   @JsonProperty
@@ -98,7 +99,7 @@ public class LifecycleContext implements LifecycleListener {
     return status.startsWith("COMPLETE");
   }
 
-  @JsonProperty
+  @JsonIgnore
   public synchronized Throwable getThrowable() {
     return throwable;
   }
