@@ -88,12 +88,19 @@ public class LifecycleContext implements LifecycleListener {
     return throwable != null ? throwable.getMessage() : "";
   }
 
+  @JsonProperty
   public synchronized boolean hasError() {
     return throwable != null;
   }
 
+  @JsonProperty
   public synchronized boolean isComplete() {
     return status.startsWith("COMPLETE");
+  }
+
+  @JsonProperty
+  public synchronized Throwable getThrowable() {
+    return throwable;
   }
 
   private static String formatDate(final Date date) {
