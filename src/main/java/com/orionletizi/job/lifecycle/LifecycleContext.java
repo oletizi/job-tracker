@@ -86,7 +86,20 @@ public class LifecycleContext implements LifecycleListener {
 
   @JsonProperty
   public synchronized String getError() {
-    return throwable != null ? throwable.getClass().getSimpleName() + ": " + throwable.getMessage() : "";
+    final StringBuilder msg = new StringBuilder();
+    Throwable t = throwable;
+    while (t != null) {
+      msg.append(t.getClass().getSimpleName());
+      if (t.getMessage() != null) {
+        msg.append(": " + t.getMessage());
+      }
+      final Throwable cause = t.getCause();
+      if (cause != null) {
+        msg.append("; Caused by: ");
+      }
+      t = cause;
+    }
+    return msg.toString();
   }
 
   @JsonProperty

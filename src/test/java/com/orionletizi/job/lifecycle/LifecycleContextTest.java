@@ -14,9 +14,9 @@ public class LifecycleContextTest {
     final LifecycleContext ctxt = new LifecycleContext();
     mapper.writeValueAsString(ctxt);
 
-    ctxt.error(new RuntimeException("Am I serializable?"));
+    ctxt.error(new RuntimeException("I am the proximate cause.", new RuntimeException("I'm the root cause")));
 
-    final String json = mapper.writeValueAsString(ctxt);
+    final String json = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(ctxt);
     System.out.println(json);
   }
 
